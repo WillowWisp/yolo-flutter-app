@@ -187,38 +187,22 @@ public class ObjectClassifier: Predictor {
 
     do {
       try requestHandler.perform([request])
-      if let observation = request.results as? [VNCoreMLFeatureValueObservation] {
-
-        // Get the MLMultiArray from the observation
-        let multiArray = observation.first?.featureValue.multiArrayValue
-
-        if let multiArray = multiArray {
-          // Initialize an array to store the classes
-          var valuesArray = [Double]()
-
-          // Loop through the MLMultiArray and append its values to the array
-          for i in 0..<multiArray.count {
-            let value = multiArray[i].doubleValue
-            valuesArray.append(value)
-          }
-
-          // Create an indexed map as a dictionary
-          var indexedMap = [Int: Double]()
-          for (index, value) in valuesArray.enumerated() {
-            indexedMap[index] = value
-          }
-
-          // Sort the dictionary in descending order based on values
-          let sortedMap = indexedMap.sorted(by: { $0.value > $1.value })
-
-          for (index, value) in sortedMap {
-            let label = self.labels[index]
-            recognitions.append([
-              "label": label,
-              "confidence": value,
-              "index": index,
-            ])
-          }
+        
+      if let observationList = request.results as? [VNClassificationObservation] {
+        for observation in observationList {
+          // Extract label and confidence from the observation
+          let label = observation.identifier
+          let confidence = observation.confidence
+          
+          // Find index from self.labels
+          let index = self.labels.firstIndex(of: label)
+          
+          // Append the recognition to the array
+          recognitions.append([
+            "index": index ?? -1,
+            "label": label,
+            "confidence": Double(confidence),
+          ])
         }
       }
     } catch {
