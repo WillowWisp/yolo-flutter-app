@@ -13,5 +13,5 @@ class ImageClassifier extends Predictor {
 
   /// Classifies an image from the given [imagePath].
   Future<List<ClassificationResult?>?> classify({required String imagePath}) =>
-      ultralyticsYoloPlatform.classifyImage(imagePath);
+      ultralyticsYoloPlatform.classifyImage(model.id, imagePath);
 }

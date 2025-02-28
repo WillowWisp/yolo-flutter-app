@@ -2,7 +2,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:ultralytics_yolo/predict/classify/classification_result.dart';
 import 'package:ultralytics_yolo/predict/detect/detected_object.dart';
-
 import 'package:ultralytics_yolo/ultralytics_yolo_platform_interface.dart';
 
 /// An implementation of [UltralyticsYoloPlatform] that uses method channels.
@@ -36,19 +35,25 @@ class PlatformChannelUltralyticsYolo implements UltralyticsYoloPlatform {
       }).catchError((dynamic e) => e.toString());
 
   @override
-  Future<String?> setConfidenceThreshold(double confidence) =>
+  Future<String?> setConfidenceThreshold(String modelId, double confidence) =>
       methodChannel.invokeMethod<String>(
         'setConfidenceThreshold',
-        {'confidence': confidence},
+        {"modelId": modelId, 'confidence': confidence},
       );
 
   @override
-  Future<String?> setIouThreshold(double iou) =>
-      methodChannel.invokeMethod<String>('setIouThreshold', {'iou': iou});
+  Future<String?> setIouThreshold(String modelId, double iou) =>
+      methodChannel.invokeMethod<String>('setIouThreshold', {
+        "modelId": modelId,
+        'iou': iou,
+      });
 
   @override
-  Future<String?> setNumItemsThreshold(int numItems) => methodChannel
-      .invokeMethod<String>('setNumItemsThreshold', {'numItems': numItems});
+  Future<String?> setNumItemsThreshold(String modelId, int numItems) =>
+      methodChannel.invokeMethod<String>('setNumItemsThreshold', {
+        "modelId": modelId,
+        'numItems': numItems,
+      });
 
   @override
   Future<String?> setZoomRatio(double ratio) =>
@@ -121,9 +126,13 @@ class PlatformChannelUltralyticsYolo implements UltralyticsYoloPlatform {
       .map((rate) => (rate as num).toDouble());
 
   @override
-  Future<List<ClassificationResult?>?> classifyImage(String imagePath) async {
+  Future<List<ClassificationResult?>?> classifyImage(
+    String modelId,
+    String imagePath,
+  ) async {
     final result =
         await methodChannel.invokeMethod<List<Object?>>('classifyImage', {
+      'modelId': modelId,
       'imagePath': imagePath,
     }).catchError((_) {
       return <ClassificationResult?>[];
@@ -140,9 +149,13 @@ class PlatformChannelUltralyticsYolo implements UltralyticsYoloPlatform {
   }
 
   @override
-  Future<List<DetectedObject?>?> detectImage(String imagePath) async {
+  Future<List<DetectedObject?>?> detectImage(
+    String modelId,
+    String imagePath,
+  ) async {
     final result =
         await methodChannel.invokeMethod<List<Object?>>('detectImage', {
+      'modelId': modelId,
       'imagePath': imagePath,
     }).catchError((_) {
       return <DetectedObject?>[];

@@ -13,20 +13,20 @@ class ObjectDetector extends Predictor {
 
   /// Sets the confidence threshold for the detection.
   void setConfidenceThreshold(double confidence) {
-    super.ultralyticsYoloPlatform.setConfidenceThreshold(confidence);
+    super.ultralyticsYoloPlatform.setConfidenceThreshold(model.id, confidence);
   }
 
   /// Sets the Intersection over Union (IoU) threshold for the detection.
   void setIouThreshold(double iou) {
-    super.ultralyticsYoloPlatform.setIouThreshold(iou);
+    super.ultralyticsYoloPlatform.setIouThreshold(model.id, iou);
   }
 
   /// Sets the number of items threshold for the detection.
   void setNumItemsThreshold(int numItems) {
-    super.ultralyticsYoloPlatform.setNumItemsThreshold(numItems);
+    super.ultralyticsYoloPlatform.setNumItemsThreshold(model.id, numItems);
   }
 
   /// Detects objects from the given [imagePath].
   Future<List<DetectedObject?>?> detect({required String imagePath}) =>
-      super.ultralyticsYoloPlatform.detectImage(imagePath);
+      super.ultralyticsYoloPlatform.detectImage(model.id, imagePath);
 }

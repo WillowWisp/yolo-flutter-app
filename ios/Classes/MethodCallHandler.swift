@@ -13,7 +13,7 @@ class MethodCallHandler: VideoCaptureDelegate, InferenceTimeListener, ResultsLis
   private let resultStreamHandler: ResultStreamHandler
   private let inferenceTimeStreamHandler: TimeStreamHandler
   private let fpsRateStreamHandler: TimeStreamHandler
-  private var predictor: Predictor?
+  private var predictors: [String:Predictor?] = [:]
   private let videoCapture: VideoCapture
 
   init(binaryMessenger: FlutterBinaryMessenger, videoCapture: VideoCapture) {
@@ -61,7 +61,7 @@ class MethodCallHandler: VideoCaptureDelegate, InferenceTimeListener, ResultsLis
   public func videoCapture(
     _ capture: VideoCapture, didCaptureVideoFrame sampleBuffer: CMSampleBuffer
   ) {
-    predictor?.predict(
+    getModelById(nil)?.predict(
       sampleBuffer: sampleBuffer, onResultsListener: self, onInferenceTime: self, onFpsRate: self)
   }
 
@@ -79,6 +79,8 @@ class MethodCallHandler: VideoCaptureDelegate, InferenceTimeListener, ResultsLis
       result(flutterError)
       return
     }
+
+    let modelId=(model["id"] as? String?) ?? "A_DEFAULT_ID"
 
     var yoloModel: (any YoloModel)?
     guard let task = model["task"] as? String
@@ -106,10 +108,10 @@ class MethodCallHandler: VideoCaptureDelegate, InferenceTimeListener, ResultsLis
     do {
       switch task {
       case "detect":
-        predictor = try await ObjectDetector(yoloModel: yoloModel!)
+        predictors[modelId!] = try await ObjectDetector(yoloModel: yoloModel!)
         break
       case "classify":
-        predictor = try await ObjectClassifier(yoloModel: yoloModel!)
+        predictors[modelId!] = try await ObjectClassifier(yoloModel: yoloModel!)
         break
       default:
         result(flutterError)
@@ -124,17 +126,20 @@ class MethodCallHandler: VideoCaptureDelegate, InferenceTimeListener, ResultsLis
 
   private func setConfidenceThreshold(args: [String: Any], result: @escaping FlutterResult) {
     let conf = args["confidence"] as! Double
-    (predictor as? ObjectDetector)?.setConfidenceThreshold(confidence: conf)
+    let modelId=args["modelId"] as! String
+    (getModelById(modelId) as? ObjectDetector)?.setConfidenceThreshold(confidence: conf)
   }
 
   private func setIouThreshold(args: [String: Any], result: @escaping FlutterResult) {
     let iou = args["iou"] as! Double
-    (predictor as? ObjectDetector)?.setIouThreshold(iou: iou)
+    let modelId=args["modelId"] as! String
+    (getModelById(modelId) as? ObjectDetector)?.setIouThreshold(iou: iou)
   }
 
   private func setNumItemsThreshold(args: [String: Any], result: @escaping FlutterResult) {
     let numItems = args["numItems"] as! Int
-    (predictor as? ObjectDetector)?.setNumItemsThreshold(numItems: numItems)
+    let modelId=args["modelId"] as! String
+    (getModelById(modelId) as? ObjectDetector)?.setNumItemsThreshold(numItems: numItems)
   }
 
   private func setLensDirection(args: [String: Any], result: @escaping FlutterResult) {
@@ -155,8 +160,9 @@ class MethodCallHandler: VideoCaptureDelegate, InferenceTimeListener, ResultsLis
 
   private func predictOnImage(args: [String: Any], result: @escaping FlutterResult) {
     let imagePath = args["imagePath"] as! String
+    let modelId=args["modelId"] as! String
     let image = try? createCIImage(fromPath: imagePath)
-    predictor?.predictOnImage(
+    getModelById(modelId)?.predictOnImage(
       image: image!,
       completion: { recognitions in
         result(recognitions)
@@ -173,5 +179,13 @@ class MethodCallHandler: VideoCaptureDelegate, InferenceTimeListener, ResultsLis
 
   func on(fpsRate: Double) {
     fpsRateStreamHandler.sink(time: fpsRate)
+  }
+
+  private func getModelById(_ id: String?)->Predictor?{
+     if id == nil{
+         return predictors["A_DEFAULT_ID"] ?? predictors.first?.value
+      }
+
+     return predictors[id!] ?? predictors.first?.value
   }
 }

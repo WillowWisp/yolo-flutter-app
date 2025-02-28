@@ -31,19 +31,19 @@ abstract class UltralyticsYoloPlatform extends PlatformInterface {
   }
 
   /// Set the confidence threshold for the model.
-  Future<String?> setConfidenceThreshold(double confidence) {
+  Future<String?> setConfidenceThreshold(String modelId, double confidence) {
     throw UnimplementedError(
       'setConfidenceThreshold has not been implemented.',
     );
   }
 
   /// Set the Intersection over Union (IoU) threshold for the model.
-  Future<String?> setIouThreshold(double iou) {
+  Future<String?> setIouThreshold(String modelId, double iou) {
     throw UnimplementedError('setIoUThreshold has not been implemented.');
   }
 
   /// Set the number of items threshold for the model.
-  Future<String?> setNumItemsThreshold(int numItems) {
+  Future<String?> setNumItemsThreshold(String modelId, int numItems) {
     throw UnimplementedError('setNumItemsThreshold has not been implemented.');
   }
 
@@ -83,7 +83,7 @@ abstract class UltralyticsYoloPlatform extends PlatformInterface {
   }
 
   /// Detect objects in the given [imagePath].
-  Future<List<DetectedObject?>?> detectImage(String imagePath) {
+  Future<List<DetectedObject?>?> detectImage(String modelId, String imagePath) {
     throw UnimplementedError('detectImage has not been implemented.');
   }
 
@@ -95,7 +95,10 @@ abstract class UltralyticsYoloPlatform extends PlatformInterface {
   }
 
   /// Classify the given [imagePath].
-  Future<List<ClassificationResult?>?> classifyImage(String imagePath) {
+  Future<List<ClassificationResult?>?> classifyImage(
+    String modelId,
+    String imagePath,
+  ) {
     throw UnimplementedError('predictImage has not been implemented.');
   }
 
