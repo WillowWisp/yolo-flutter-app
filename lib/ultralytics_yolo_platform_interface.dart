@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 import 'package:ultralytics_yolo/predict/classify/classification_result.dart';
 import 'package:ultralytics_yolo/predict/detect/detected_object.dart';
@@ -97,7 +99,8 @@ abstract class UltralyticsYoloPlatform extends PlatformInterface {
   /// Classify the given [imagePath].
   Future<List<ClassificationResult?>?> classifyImage(
     String modelId,
-    String imagePath,
+    String? imagePath,
+    Uint8List? imageBytes,
   ) {
     throw UnimplementedError('predictImage has not been implemented.');
   }

@@ -53,7 +53,7 @@ class MethodCallHandler: VideoCaptureDelegate, InferenceTimeListener, ResultsLis
       setLensDirection(args: args, result: result)
     } else if call.method == "closeCamera" {
       closeCamera(args: args, result: result)
-    } else if call.method == "detectImage" || call.method == "classifyImage" {
+    } else if call.method == "detectImage" || call.method == "classifyImage" || call.method == "classifyImageBytes" {
       predictOnImage(args: args, result: result)
     }
   }
@@ -159,11 +159,24 @@ class MethodCallHandler: VideoCaptureDelegate, InferenceTimeListener, ResultsLis
   }
 
   private func predictOnImage(args: [String: Any], result: @escaping FlutterResult) {
-    let imagePath = args["imagePath"] as! String
     let modelId=args["modelId"] as! String
-    let image = try? createCIImage(fromPath: imagePath)
+    
+    let createdImage: CIImage? = {
+          if let path = args["imagePath"] as? String {
+              return try? createCIImage(fromPath: path)
+          } else if let bytes = (args["imageBytes"] as? FlutterStandardTypedData)?.data {
+              return CIImage(data: bytes)
+          }
+          return nil
+      }()
+
+     guard let image = createdImage else {
+              result(FlutterError(code: "IMAGE_ERROR", message: "Failed to load image from path or bytes", details: nil))
+              return
+          }
+      
     getModelById(modelId)?.predictOnImage(
-      image: image!,
+      image: image,
       completion: { recognitions in
         result(recognitions)
       })

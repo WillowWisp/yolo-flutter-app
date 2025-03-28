@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:ultralytics_yolo/predict/classify/classification_result.dart';
 import 'package:ultralytics_yolo/predict/predictor.dart';
 import 'package:ultralytics_yolo/yolo_model.dart';
@@ -11,7 +13,10 @@ class ImageClassifier extends Predictor {
   Stream<List<ClassificationResult?>?> get classificationResultStream =>
       ultralyticsYoloPlatform.classificationResultStream;
 
-  /// Classifies an image from the given [imagePath].
-  Future<List<ClassificationResult?>?> classify({required String imagePath}) =>
-      ultralyticsYoloPlatform.classifyImage(model.id, imagePath);
+  /// Classifies an image from the given [imagePath] or [imageBytes].
+  Future<List<ClassificationResult?>?> classify({
+    String? imagePath,
+    Uint8List? imageBytes,
+  }) =>
+      ultralyticsYoloPlatform.classifyImage(model.id, imagePath, imageBytes);
 }

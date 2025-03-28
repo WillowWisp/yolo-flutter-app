@@ -128,12 +128,20 @@ class PlatformChannelUltralyticsYolo implements UltralyticsYoloPlatform {
   @override
   Future<List<ClassificationResult?>?> classifyImage(
     String modelId,
-    String imagePath,
+    String? imagePath,
+    Uint8List? imageBytes,
   ) async {
+    if (imagePath == null && imageBytes == null) {
+      throw Exception(
+        'imagePath and imageBytes cannot be null at the same time',
+      );
+    }
+
     final result =
         await methodChannel.invokeMethod<List<Object?>>('classifyImage', {
       'modelId': modelId,
       'imagePath': imagePath,
+      'imageBytes': imageBytes,
     }).catchError((_) {
       return <ClassificationResult?>[];
     });
